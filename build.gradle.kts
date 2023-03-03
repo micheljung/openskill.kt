@@ -1,62 +1,81 @@
 plugins {
-    kotlin("multiplatform") version "1.6.10"
-    `maven-publish`
+  val kotlinVersion = "1.8.10"
+  kotlin("jvm") version kotlinVersion
+  `java-library`
+  `maven-publish`
+  signing
 }
 
 val projectVersion: String by project
-group = "com.brezinajn.openskill"
-version = projectVersion
+
+group = "io.github.micheljung"
+version = project.version
+description = "Kotlin implementation of Openskill."
 
 repositories {
-    mavenCentral()
+  mavenCentral()
 }
-kotlin {
-    jvm {
-        compilations.all {
-            kotlinOptions.jvmTarget = "1.8"
-        }
-    }
-    js {
-        browser {
-            testTask {
-                useKarma {
-                    useChromeHeadless()
-                    webpackConfig.cssSupport.enabled = true
-                }
-            }
-        }
-    }
-    val hostOs = System.getProperty("os.name")
-    val isMingwX64 = hostOs.startsWith("Windows")
-    val nativeTarget = when {
-        hostOs == "Mac OS X" -> macosX64("native")
-        hostOs == "Linux" -> linuxX64("native")
-        isMingwX64 -> mingwX64("native")
-        else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
-    }
 
-    
-    sourceSets {
-        val commonMain by getting
-        val commonTest by getting {
-            dependencies {
-                implementation(kotlin("test-common"))
-                implementation(kotlin("test-annotations-common"))
-            }
-        }
-        val jvmMain by getting
-        val jvmTest by getting {
-            dependencies {
-                implementation(kotlin("test-junit"))
-            }
-        }
-        val jsMain by getting
-        val jsTest by getting {
-            dependencies {
-                implementation(kotlin("test-js"))
-            }
-        }
-        val nativeMain by getting
-        val nativeTest by getting
+java {
+  withSourcesJar()
+  withJavadocJar()
+}
+
+val publicationName = "kotlin"
+
+publishing {
+  repositories {
+    maven {
+      name = "OSSRH"
+      setUrl("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+      credentials {
+        username = System.getenv("OSSRH_USERNAME")
+        password = System.getenv("OSSRH_TOKEN")
+      }
     }
+  }
+
+  publications {
+    create<MavenPublication>(publicationName) {
+      groupId = "io.github.micheljung"
+      artifactId = "openskill"
+
+      from(components["kotlin"])
+      artifact(tasks["sourcesJar"])
+      artifact(tasks["javadocJar"])
+
+      pom {
+        name.set("Suirwik Components")
+        description.set(project.description)
+        url.set("https://github.com/micheljung/suirwik")
+        licenses {
+          license {
+            name.set("MIT License")
+            url.set("http://www.opensource.org/licenses/mit-license.php")
+          }
+        }
+        developers {
+          developer {
+            id.set("mj")
+            name.set("Michel Jung")
+            email.set("michel.jung89@gmail.com")
+          }
+        }
+        scm {
+          connection.set("scm:git:https://github.com/micheljung/openskill.kt.git")
+          developerConnection.set("scm:git:https://github.com/micheljung/openskill.kt.git")
+          url.set("https://github.com/micheljung/openskill.kt")
+        }
+      }
+    }
+  }
+}
+
+signing {
+  useGpgCmd()
+  sign(publishing.publications[publicationName])
+}
+
+dependencies {
+  implementation(kotlin("stdlib-jdk8"))
 }

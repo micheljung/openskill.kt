@@ -1,10 +1,10 @@
-Kotlin multiplatform implementation of [this](https://github.com/philihp/openskill.js) great library, that can be used
-with your model out of the box!
+Kotlin implementation of [Openskill](https://github.com/philihp/openskill.js).
+
+Forked from https://github.com/brezinajn/openskill.kt.
 
 #### Getting started:
 
-* Add jitpack to you repositories: `https://jitpack.io`
-* Add as dependency `com.github.brezinajn:openskill.kt:0.0.1`
+* Add a dependency to `io.github.micheljung:openskill.kt:0.0.1`
 
 #### Usage:
 
